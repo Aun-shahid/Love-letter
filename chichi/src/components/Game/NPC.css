@@ -1,0 +1,251 @@
+/**
+ * NPC CSS Styles
+ * 
+ * Styling for all NPC characters.
+ * Each NPC type has unique visual characteristics.
+ */
+
+.npc {
+  position: absolute;
+  cursor: pointer;
+  z-index: 50;
+  transition: all 0.3s ease;
+}
+
+.npc-sprite {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* NPC body placeholder */
+.npc-body {
+  width: 100%;
+  height: calc(100% - 15px);
+  background: linear-gradient(
+    180deg,
+    var(--npc-accent) 0%,
+    var(--npc-color) 100%
+  );
+  border-radius: 10px;
+  border: 2px solid var(--npc-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.npc-emoji {
+  font-size: 1.5rem;
+}
+
+/* Decoration element */
+.npc-decoration {
+  position: absolute;
+  top: -10px;
+  right: -5px;
+  font-size: 1rem;
+  animation: decorationFloat 2s ease-in-out infinite;
+}
+
+@keyframes decorationFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(-5deg);
+  }
+  50% {
+    transform: translateY(-3px) rotate(5deg);
+  }
+}
+
+/* NPC label */
+.npc-label {
+  text-align: center;
+  font-size: 0.65rem;
+  margin-top: 3px;
+  font-weight: bold;
+  text-shadow: 0 0 5px currentColor;
+}
+
+/* Interaction hint (exclamation mark) */
+.npc-interact-hint {
+  position: absolute;
+  top: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 20px;
+  background: #ffd700;
+  color: #333;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.9rem;
+  animation: hintBounce 0.8s ease-in-out infinite;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+}
+
+@keyframes hintBounce {
+  0%, 100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    transform: translateX(-50%) translateY(-5px);
+  }
+}
+
+/* Hover effect */
+.npc:hover .npc-body {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px var(--npc-accent);
+}
+
+/* ==========================================
+   BAT-SPECIFIC STYLES
+   ========================================== */
+
+.npc-bat {
+  animation: batFloat 3s ease-in-out infinite;
+}
+
+@keyframes batFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(2deg);
+  }
+}
+
+.npc-bat .npc-decoration {
+  top: -5px;
+  right: 0;
+  animation: bowWiggle 2s ease-in-out infinite;
+}
+
+@keyframes bowWiggle {
+  0%, 100% {
+    transform: rotate(-10deg);
+  }
+  50% {
+    transform: rotate(10deg);
+  }
+}
+
+/* ==========================================
+   DELICE (GHOST CAT) STYLES
+   ========================================== */
+
+.npc-delice.ghost {
+  opacity: 0.85;
+}
+
+.npc-delice.ghost .npc-body {
+  background: linear-gradient(
+    180deg,
+    rgba(127, 255, 212, 0.6) 0%,
+    rgba(26, 74, 58, 0.8) 100%
+  );
+  box-shadow: 
+    0 0 20px rgba(127, 255, 212, 0.4),
+    inset 0 0 15px rgba(127, 255, 212, 0.2);
+  animation: ghostPulse 2s ease-in-out infinite;
+}
+
+@keyframes ghostPulse {
+  0%, 100% {
+    opacity: 0.8;
+    box-shadow: 
+      0 0 20px rgba(127, 255, 212, 0.4),
+      inset 0 0 15px rgba(127, 255, 212, 0.2);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 
+      0 0 30px rgba(127, 255, 212, 0.6),
+      inset 0 0 20px rgba(127, 255, 212, 0.3);
+  }
+}
+
+/* Glowing state (when appearing) */
+.npc-delice.glowing .npc-body {
+  animation: ghostAppear 1s ease-out forwards;
+}
+
+@keyframes ghostAppear {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+    box-shadow: 0 0 50px rgba(127, 255, 212, 0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+}
+
+/* ==========================================
+   NIENIE STYLES
+   ========================================== */
+
+.npc-nienie {
+  /* Nienie is static, sleeping */
+}
+
+.npc-nienie.sleeping .npc-body {
+  animation: sleepingBreath 3s ease-in-out infinite;
+}
+
+@keyframes sleepingBreath {
+  0%, 100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(1.03);
+  }
+}
+
+.npc-nienie.sleeping::after {
+  content: '💤';
+  position: absolute;
+  top: -30px;
+  right: -10px;
+  font-size: 1.2rem;
+  animation: zzz 2s ease-in-out infinite;
+}
+
+@keyframes zzz {
+  0%, 100% {
+    opacity: 0.5;
+    transform: translateY(0) scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-10px) scale(1);
+  }
+}
+
+/* ==========================================
+   FADE OUT ANIMATION (for bat leaving)
+   ========================================== */
+
+.npc.fade-out {
+  animation: npcFadeOut 1s ease-out forwards;
+}
+
+@keyframes npcFadeOut {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+}

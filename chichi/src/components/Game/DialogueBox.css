@@ -1,0 +1,176 @@
+/**
+ * DialogueBox CSS Styles
+ * 
+ * Styling for the dialogue overlay and text box.
+ * Uses a visual novel / JRPG inspired design.
+ */
+
+/* Overlay that darkens the background */
+.dialogue-overlay {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20px;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+/* Main dialogue box container */
+.dialogue-box {
+  max-width: 800px;
+  margin: 0 auto;
+  background: linear-gradient(
+    135deg,
+    rgba(30, 30, 50, 0.95) 0%,
+    rgba(50, 40, 70, 0.95) 100%
+  );
+  border: 3px solid rgba(255, 158, 205, 0.6);
+  border-radius: 15px;
+  padding: 20px 25px;
+  box-shadow: 
+    0 0 20px rgba(255, 158, 205, 0.3),
+    inset 0 0 30px rgba(0, 0, 0, 0.3);
+  pointer-events: auto;
+  animation: slideUp 0.3s ease-out;
+}
+
+/* Narration style (more subtle) */
+.dialogue-box.narration {
+  border-color: rgba(192, 192, 192, 0.4);
+  background: linear-gradient(
+    135deg,
+    rgba(20, 20, 30, 0.95) 0%,
+    rgba(40, 40, 50, 0.95) 100%
+  );
+  box-shadow: 
+    0 0 15px rgba(192, 192, 192, 0.2),
+    inset 0 0 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Action style (italic, centered) */
+.dialogue-box.action {
+  border-color: rgba(127, 255, 212, 0.5);
+}
+
+/* Speaker name */
+.dialogue-speaker {
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+  text-shadow: 0 0 10px currentColor;
+  letter-spacing: 1px;
+}
+
+/* Main dialogue text */
+.dialogue-text {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  color: #f0f0f0;
+  margin-bottom: 15px;
+  min-height: 60px;
+}
+
+/* Action text style */
+.dialogue-text.action-text {
+  font-style: italic;
+  color: #c0c0c0;
+  text-align: center;
+}
+
+/* Narration text style */
+.dialogue-text.narration-text {
+  font-style: italic;
+  color: #b0b0b0;
+  text-align: center;
+  font-size: 1.1rem;
+}
+
+/* Footer with progress and button */
+.dialogue-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 12px;
+}
+
+/* Progress indicator */
+.dialogue-progress {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Next/Close button */
+.dialogue-next-btn {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 158, 205, 0.8) 0%,
+    rgba(200, 100, 150, 0.8) 100%
+  );
+  border: none;
+  color: white;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.dialogue-next-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(255, 158, 205, 0.5);
+}
+
+.dialogue-next-btn:active {
+  transform: scale(0.98);
+}
+
+/* Keyboard hint */
+.dialogue-hint {
+  text-align: center;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.3);
+  margin-top: 10px;
+}
+
+.dialogue-hint kbd {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-family: monospace;
+}
+
+/* Slide up animation */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .dialogue-overlay {
+    padding: 10px;
+  }
+
+  .dialogue-box {
+    padding: 15px;
+  }
+
+  .dialogue-text {
+    font-size: 1rem;
+    min-height: 50px;
+  }
+
+  .dialogue-speaker {
+    font-size: 1rem;
+  }
+}

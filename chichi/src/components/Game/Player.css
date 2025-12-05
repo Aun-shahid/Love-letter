@@ -1,0 +1,97 @@
+/**
+ * Player CSS Styles
+ * 
+ * Placeholder styling for the player character.
+ * Pink color scheme representing Chichi (Fall/Spooky aesthetic).
+ */
+
+.player {
+  position: absolute;
+  width: 60px;
+  height: 80px;
+  transition: left 0.1s ease-out, top 0.1s ease-out;
+  z-index: 100;
+}
+
+.player-sprite {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Placeholder body - Pink square for Chichi */
+.player-body {
+  width: 50px;
+  height: 60px;
+  background: linear-gradient(
+    180deg,
+    #ff9ecd 0%,
+    #ff7eb9 50%,
+    #ff69b4 100%
+  );
+  border-radius: 10px 10px 5px 5px;
+  border: 3px solid #ff1493;
+  box-shadow: 
+    0 0 15px rgba(255, 105, 180, 0.5),
+    inset 0 -10px 20px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+/* Cute face placeholder */
+.player-body::before {
+  content: '◕‿◕';
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 14px;
+  color: #333;
+}
+
+/* Hair/decoration */
+.player-body::after {
+  content: '🎀';
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 20px;
+}
+
+/* Character label */
+.player-label {
+  text-align: center;
+  font-size: 0.7rem;
+  color: #ff69b4;
+  text-shadow: 0 0 5px rgba(255, 105, 180, 0.8);
+  margin-top: 5px;
+  font-weight: bold;
+}
+
+/* Walking animation */
+.player.moving .player-body {
+  animation: playerBob 0.3s ease-in-out infinite;
+}
+
+@keyframes playerBob {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+/* Idle breathing animation */
+.player:not(.moving) .player-body {
+  animation: playerBreath 2s ease-in-out infinite;
+}
+
+@keyframes playerBreath {
+  0%, 100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(1.02);
+  }
+}
