@@ -13,12 +13,16 @@
  * 7. Door unlocks -> Player can proceed to Act 2
  */
 
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useCallback, useState, useRef } from 'react';
 import useGameStore from '../../store/useGameStore';
 import Player from '../Game/Player';
+import Cat from '../Game/cat';
 import NPC from '../Game/NPC';
+import Furniture from '../Game/Furniture';
+import UIButton from '../Game/UIButton';
 import DialogueBox from '../Game/DialogueBox';
 import { ACT1_DIALOGUES } from '../../data/dialogues';
+import bedroomMusic from '../../assets/music/bedroom.mp3';
 import './ActOne.css';
 
 // Movement speed (pixels per tick)
@@ -31,16 +35,23 @@ const checkCollision = (rect1, rect2, threshold = 30) => {
 };
 
 const ActOne = () => {
+  // Create audio reference for background music
+  const audioRef = useRef(null);
+
   // Get state and actions from store
   const {
     playerPosition,
-    setPlayerPosition,
     movePlayer,
     stopPlayer,
     flags,
     setFlag,
     npcStates,
     setNPCVisible,
+    furnitureStates,
+    toggleFurniture,
+    collectibles,
+    collectItem,
+    hasAllCollectibles,
     startDialogue,
     isDialogueActive,
     nextAct,
@@ -50,6 +61,60 @@ const ActOne = () => {
   const [storyPhase, setStoryPhase] = useState('opening');
   const [batFadingOut, setBatFadingOut] = useState(false);
   const [pressedKeys, setPressedKeys] = useState(new Set());
+  const [isMusicPlaying, setIsMusicPlaying] = useState(true);
+
+  /**
+   * Initialize background music on mount
+   */
+  useEffect(() => {
+    if (!audioRef.current) {
+      audioRef.current = new Audio(bedroomMusic);
+      audioRef.current.loop = true;
+      audioRef.current.volume = 0.3; // Set volume to 30%
+      
+      // Try to play immediately
+      const playPromise = audioRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            console.log('Music playing');
+          })
+          .catch(err => {
+            console.log('Autoplay blocked, waiting for user interaction:', err);
+            // Add click listener to enable audio on user interaction
+            const enableAudio = () => {
+              if (audioRef.current) {
+                audioRef.current.play().catch(e => console.log('Play failed:', e));
+              }
+              document.removeEventListener('click', enableAudio);
+            };
+            document.addEventListener('click', enableAudio);
+          });
+      }
+    }
+
+    // Cleanup: stop music when component unmounts
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+    };
+  }, []);
+
+  /**
+   * Toggle music on/off
+   */
+  const toggleMusic = useCallback(() => {
+    if (audioRef.current) {
+      if (isMusicPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play().catch(err => console.log('Audio play failed:', err));
+      }
+      setIsMusicPlaying(!isMusicPlaying);
+    }
+  }, [isMusicPlaying]);
 
   /**
    * Initialize Act 1 - Show opening dialogue
@@ -73,34 +138,37 @@ const ActOne = () => {
   }, [setFlag]);
 
   /**
-   * Handle bat interaction
+   * Handle bat interaction - Check if all collectibles are collected
    */
   const handleBatClick = useCallback(() => {
     if (flags.hasTalkedToBat || isDialogueActive) return;
     
-    startDialogue(ACT1_DIALOGUES.batEncounter.bat.blockDoor);
-    setStoryPhase('batTalking');
-  }, [flags.hasTalkedToBat, isDialogueActive, startDialogue]);
+    // Check if player has all collectibles
+    if (hasAllCollectibles()) {
+      // Player has everything, let them through
+      startDialogue(ACT1_DIALOGUES.batEncounter.bat.allowExit);
+      setStoryPhase('batAllowingExit');
+    } else {
+      // Player is missing items, bat blocks them
+      startDialogue(ACT1_DIALOGUES.batEncounter.bat.blockDoor);
+      setStoryPhase('batTalking');
+    }
+  }, [flags.hasTalkedToBat, isDialogueActive, startDialogue, hasAllCollectibles]);
 
   /**
-   * Handle bat dialogue completion - Reveal Delice
+   * Handle bat dialogue completion
    */
   const handleBatDialogueComplete = useCallback(() => {
     setFlag('hasTalkedToBat', true);
     
-    // Reveal Delice the Cat after a moment
-    setTimeout(() => {
-      setNPCVisible('delice', true);
-      setFlag('hasMetDelice', true);
-      setStoryPhase('deliceAppeared');
-      
-      // Auto-start Chichi's reaction to seeing Delice
-      setTimeout(() => {
-        startDialogue(ACT1_DIALOGUES.catEncounter.chichi.noticeCat);
-        setStoryPhase('chichiNoticingCat');
-      }, 1500);
-    }, 500);
-  }, [setFlag, setNPCVisible, startDialogue]);
+    if (hasAllCollectibles()) {
+      // All items collected, door unlocks
+      startDialogue(ACT1_DIALOGUES.doorUnlocked.narrator.description);
+      setStoryPhase('doorUnlocking');
+    }
+    // If still missing items, just end dialogue and stay in exploration
+    setStoryPhase('exploration');
+  }, [setFlag, hasAllCollectibles, startDialogue]);
 
   /**
    * Handle Chichi noticing cat dialogue complete
@@ -112,6 +180,62 @@ const ActOne = () => {
   }, [startDialogue]);
 
   /**
+   * Handle wardrobe click - offers to take tooth earrings
+   */
+  const handleWardrobeClick = useCallback(() => {
+    toggleFurniture('wardrobe1');
+    
+    if (!furnitureStates.wardrobe1.isOpen && !collectibles.toothEarrings) {
+      // Just opened, offer to take earrings
+      startDialogue(ACT1_DIALOGUES.furnitureInteraction.wardrobe.takeEarrings);
+      setStoryPhase('takingEarrings');
+    }
+  }, [toggleFurniture, furnitureStates.wardrobe1.isOpen, collectibles.toothEarrings, startDialogue]);
+
+  /**
+   * Handle bedside table click - offers to take Jonas spider
+   */
+  const handleBedsideTableClick = useCallback(() => {
+    toggleFurniture('bedsideTable');
+    
+    if (!furnitureStates.bedsideTable.isOpen && !collectibles.jonaSpider) {
+      // Just opened, offer to take spider
+      startDialogue(ACT1_DIALOGUES.furnitureInteraction.table.takeSpider);
+      setStoryPhase('takingSpider');
+    }
+  }, [toggleFurniture, furnitureStates.bedsideTable.isOpen, collectibles.jonaSpider, startDialogue]);
+
+  /**
+   * Handle bed click - check under bed for macaron
+   */
+  const handleBedClick = useCallback(() => {
+    if (!collectibles.macaron) {
+      // Show macaron collection dialogue
+      startDialogue(ACT1_DIALOGUES.furnitureInteraction.bed.takeMacaron);
+      setStoryPhase('takingMacaron');
+    }
+  }, [collectibles.macaron, startDialogue]);
+
+  /**
+   * Handle choice to take item or not
+   */
+  const handleItemChoice = useCallback((choiceId) => {
+    if (choiceId === 'takeYes') {
+      // Actually collect the item based on current phase
+      if (storyPhase === 'takingEarrings') {
+        collectItem('toothEarrings');
+      } else if (storyPhase === 'takingSpider') {
+        collectItem('jonaSpider');
+      } else if (storyPhase === 'takingMacaron') {
+        collectItem('macaron');
+      }
+      setStoryPhase('exploration');
+    } else if (choiceId === 'takeNo') {
+      setStoryPhase('exploration');
+    }
+  }, [storyPhase, collectItem]);
+
+  /**
    * Handle Delice dialogue completion
    */
   const handleDeliceDialogueComplete = useCallback(() => {
@@ -121,6 +245,26 @@ const ActOne = () => {
     startDialogue(ACT1_DIALOGUES.batEncounter.bat.afterCatAppears);
     setStoryPhase('batLeaving');
   }, [setFlag, startDialogue]);
+
+  /**
+   * Handle collision with Delice - Initiate conversation
+   */
+  const handleDeliceCollision = useCallback(() => {
+    startDialogue(ACT1_DIALOGUES.catEncounter.chichi.meetDelice);
+    setStoryPhase('meetsDelice');
+  }, [startDialogue]);
+
+  /**
+   * Handle choice selection from dialogue
+   */
+  const handleChoice = useCallback((choiceId) => {
+    // Store the choice and end dialogue
+    if (choiceId === 'petYes') {
+      setStoryPhase('petYes');
+    } else if (choiceId === 'petNo') {
+      setStoryPhase('petNo');
+    }
+  }, []);
 
   /**
    * Handle bat leaving dialogue complete
@@ -160,6 +304,50 @@ const ActOne = () => {
       case 'chichiNoticingCat':
         handleChichiNoticeComplete();
         break;
+      case 'meetsDelice':
+        // Show delice's meow, then show pet choice
+        startDialogue(ACT1_DIALOGUES.catEncounter.delice.introduction);
+        setStoryPhase('deliceIntroduction');
+        break;
+      case 'deliceIntroduction':
+        // After meow, show pet choice
+        setStoryPhase('showPetChoice');
+        break;
+      case 'petYes':
+        // Show purr dialogue
+        startDialogue(ACT1_DIALOGUES.catEncounter.delice.interaction.pet);
+        setStoryPhase('delicePurring');
+        break;
+      case 'delicePurring':
+        setFlag('hasTalkedToDelice', true);
+        // Just end, don't auto-trigger bat dialogue
+        setStoryPhase('exploration');
+        break;
+      case 'petNo':
+        setFlag('hasTalkedToDelice', true);
+        // Just end, don't auto-trigger bat dialogue
+        setStoryPhase('exploration');
+        break;
+      case 'batTalking':
+        handleBatDialogueComplete();
+        break;
+      case 'batAllowingExit':
+        // Bat allows exit, set door as unlocked
+        setFlag('isDoorUnlocked', true);
+        setStoryPhase('canProceed');
+        break;
+      case 'takingEarrings':
+        // Show choice buttons for taking earrings
+        setStoryPhase('earringChoice');
+        break;
+      case 'takingSpider':
+        // Show choice buttons for taking spider
+        setStoryPhase('spiderChoice');
+        break;
+      case 'takingMacaron':
+        // Show choice buttons for taking macaron
+        setStoryPhase('macaronChoice');
+        break;
       case 'deliceTalking':
         handleDeliceDialogueComplete();
         break;
@@ -177,9 +365,11 @@ const ActOne = () => {
     handleOpeningComplete,
     handleBatDialogueComplete,
     handleChichiNoticeComplete,
-    handleDeliceDialogueComplete,
+    handleDeliceCollision,
     handleBatLeavingComplete,
     handleDoorUnlockComplete,
+    startDialogue,
+    setFlag,
   ]);
 
   /**
@@ -233,29 +423,47 @@ const ActOne = () => {
       if (pressedKeys.has('d') || pressedKeys.has('arrowright')) deltaX += MOVE_SPEED;
 
       if (deltaX !== 0 || deltaY !== 0) {
-        // Calculate new position
-        const newX = Math.max(50, Math.min(playerPosition.x + deltaX, 750));
-        const newY = Math.max(200, Math.min(playerPosition.y + deltaY, 450));
+        // Calculate new position - bounded within 600x500 room
+        // Player area: X from 30 to 530, Y from 280 to 420 (floor area)
+        const newX = Math.max(30, Math.min(playerPosition.x + deltaX, 530));
+        const newY = Math.max(280, Math.min(playerPosition.y + deltaY, 420));
+        
+        // Calculate actual deltas after bounds checking
+        const actualDeltaX = newX - playerPosition.x;
+        const actualDeltaY = newY - playerPosition.y;
         
         // Check for door collision (right side) - only allow if door is unlocked
-        if (newX > 700 && !flags.isDoorUnlocked) {
-          // Blocked by door
+        if (newX > 480 && !flags.isDoorUnlocked) {
+          // Blocked by door - still update facing direction
+          movePlayer(0, actualDeltaY);
           return;
         }
         
         // Check for exiting through door
-        if (newX > 750 && flags.isDoorUnlocked) {
+        if (newX > 520 && flags.isDoorUnlocked) {
           // Proceed to Act 2
           nextAct();
           return;
         }
 
-        setPlayerPosition(newX, newY);
+        // Use movePlayer to update position AND facing direction
+        movePlayer(actualDeltaX, actualDeltaY);
       }
     }, 1000 / 60); // 60 FPS
 
     return () => clearInterval(moveLoop);
-  }, [pressedKeys, isDialogueActive, playerPosition, flags.isDoorUnlocked, setPlayerPosition, stopPlayer, nextAct]);
+  }, [pressedKeys, isDialogueActive, playerPosition, flags.isDoorUnlocked, movePlayer, stopPlayer, nextAct]);
+
+  /**
+   * Check for collision with Delice NPC
+   */
+  useEffect(() => {
+    if (!npcStates.delice.visible || flags.hasTalkedToDelice || isDialogueActive) return;
+
+    if (checkCollision(playerPosition, npcStates.delice.position, 60)) {
+      handleDeliceCollision();
+    }
+  }, [playerPosition, npcStates.delice, flags.hasTalkedToDelice, isDialogueActive, handleDeliceCollision]);
 
   /**
    * Check for collision with Bat NPC
@@ -270,18 +478,60 @@ const ActOne = () => {
 
   return (
     <div className="act-one">
-      {/* Background - Chichi's Bedroom */}
-      <div className="bedroom-bg">
+      {/* Music Toggle Button - Using FreeUi pixel art */}
+      <UIButton 
+        type="classical"
+        icon={isMusicPlaying ? '🔊' : '🔇'}
+        onClick={toggleMusic}
+        className="music-toggle-btn"
+        title={isMusicPlaying ? 'Mute music' : 'Unmute music'}
+      />
+
+      {/* Centered Room Container */}
+      <div className="room-container">
         {/* Room elements */}
         <div className="room-wall" />
         <div className="room-floor" />
         
-        {/* Bed */}
-        <div className="bed">
-          <div className="bed-frame" />
-          <div className="bed-blanket" />
-          <div className="bed-pillow" />
-        </div>
+        {/* Interactive Furniture - Organized along back wall */}
+        <Furniture 
+          type="bed" 
+          position={{ x: 50, y: 165 }} 
+          scale={1.5}
+          onClick={handleBedClick}
+        />
+        
+        <Furniture 
+          type="wardrobe" 
+          position={{ x: 200, y: 165 }} 
+          isOpen={furnitureStates.wardrobe1.isOpen}
+          onClick={handleWardrobeClick}
+          scale={1.5}
+        />
+        
+        <Furniture 
+          type="wardrobe" 
+          position={{ x: 280, y: 165 }} 
+          isOpen={furnitureStates.wardrobe2.isOpen}
+          onClick={() => toggleFurniture('wardrobe2')}
+          scale={1.5}
+        />
+        
+        <Furniture 
+          type="cupboard" 
+          position={{ x: 360, y: 165 }} 
+          isOpen={furnitureStates.cupboard.isOpen}
+          onClick={() => toggleFurniture('cupboard')}
+          scale={1.5}
+        />
+        
+        <Furniture 
+          type="bedside-table" 
+          position={{ x: 450, y: 185 }} 
+          isOpen={furnitureStates.bedsideTable.isOpen}
+          onClick={handleBedsideTableClick}
+          scale={1.5}
+        />
 
         {/* Window with fall scenery */}
         <div className="window">
@@ -300,45 +550,46 @@ const ActOne = () => {
           {flags.isDoorUnlocked && <div className="door-exit-hint">→ Exit</div>}
         </div>
 
-        {/* Decorative elements */}
+        {/* Decorative elements - Fall/Spooky aesthetic */}
         <div className="decoration pumpkin">🎃</div>
         <div className="decoration ghost-plush">👻</div>
         <div className="decoration fairy-lights">✨</div>
+
+        {/* Player (Chichi) - Now inside room container */}
+        <Player />
+
+        {/* NPCs - Now inside room container */}
+        <NPC
+          type="bat"
+          position={npcStates.bat.position}
+          visible={npcStates.bat.visible && !batFadingOut}
+          onClick={handleBatClick}
+        />
+
+        {/* Delice the Cat */}
+        <Cat
+          position={npcStates.delice.position}
+          visible={npcStates.delice.visible}
+        />
+
+        {/* UI Hints */}
+        {!isDialogueActive && flags.hasWokenUp && !flags.isDoorUnlocked && (
+          <div className="game-hint">
+            Use <kbd>WASD</kbd> or <kbd>Arrow Keys</kbd> to move
+          </div>
+        )}
+
+        {flags.isDoorUnlocked && (
+          <div className="game-hint proceed-hint">
+            The door is open! Walk through to continue →
+          </div>
+        )}
       </div>
-
-      {/* Player (Chichi) */}
-      <Player />
-
-      {/* NPCs */}
-      <NPC
-        type="bat"
-        position={npcStates.bat.position}
-        visible={npcStates.bat.visible && !batFadingOut}
-        onClick={handleBatClick}
+      {/* Dialogue Box - Outside room for full screen overlay */}
+      <DialogueBox 
+        onDialogueEnd={handleDialogueEnd} 
+        onChoice={(storyPhase === 'takingEarrings' || storyPhase === 'takingSpider' || storyPhase === 'takingMacaron' || storyPhase === 'earringChoice' || storyPhase === 'spiderChoice' || storyPhase === 'macaronChoice') ? handleItemChoice : handleChoice} 
       />
-
-      <NPC
-        type="delice"
-        position={npcStates.delice.position}
-        visible={npcStates.delice.visible}
-        glowing={storyPhase === 'deliceAppeared'}
-      />
-
-      {/* Dialogue Box */}
-      <DialogueBox onDialogueEnd={handleDialogueEnd} />
-
-      {/* UI Hints */}
-      {!isDialogueActive && flags.hasWokenUp && !flags.isDoorUnlocked && (
-        <div className="game-hint">
-          Use <kbd>WASD</kbd> or <kbd>Arrow Keys</kbd> to move
-        </div>
-      )}
-
-      {flags.isDoorUnlocked && (
-        <div className="game-hint proceed-hint">
-          The door is open! Walk through to continue →
-        </div>
-      )}
     </div>
   );
 };

@@ -127,6 +127,45 @@
   transform: scale(0.98);
 }
 
+/* Choice buttons container */
+.dialogue-choices {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.choice-btn {
+  background: linear-gradient(
+    135deg,
+    rgba(127, 255, 212, 0.7) 0%,
+    rgba(100, 200, 180, 0.7) 100%
+  );
+  border: 2px solid rgba(127, 255, 212, 0.9);
+  color: #0a0a1a;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.95rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-shadow: none;
+}
+
+.choice-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(127, 255, 212, 0.6);
+  background: linear-gradient(
+    135deg,
+    rgba(127, 255, 212, 0.9) 0%,
+    rgba(100, 200, 180, 0.9) 100%
+  );
+}
+
+.choice-btn:active {
+  transform: scale(0.98);
+}
+
 /* Keyboard hint */
 .dialogue-hint {
   text-align: center;

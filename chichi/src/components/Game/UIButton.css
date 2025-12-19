@@ -1,0 +1,92 @@
+/**
+ * UIButton CSS - Pixel art button styling using FreeUi assets
+ */
+
+.ui-button {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.2s ease;
+  z-index: 1000;
+}
+
+.ui-button-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('../../assets/FreeUi/ClassicalButtons.png');
+  background-size: 250px auto; /* 5 buttons across: 50*5 = 250px */
+  background-position: 0 0; /* First button (normal state) */
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.ui-button:hover .ui-button-bg {
+  background-position: -50px 0; /* Second button (hover state) */
+  filter: brightness(1.2);
+}
+
+.ui-button:active .ui-button-bg {
+  background-position: -100px 0; /* Third button (pressed state) */
+  transform: scale(0.95);
+}
+
+.ui-button-icon {
+  position: relative;
+  z-index: 1;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Version 1 - Blue style */
+.ui-button.version1 .ui-button-bg {
+  background-image: url('../../assets/FreeUi/Version1.png');
+}
+
+/* Version 2 - Green style */
+.ui-button.version2 .ui-button-bg {
+  background-image: url('../../assets/FreeUi/Version2.png');
+}
+
+/* Version 3 - Orange style */
+.ui-button.version3 .ui-button-bg {
+  background-image: url('../../assets/FreeUi/Version3.png');
+}
+
+/* Version 4 - Red style */
+.ui-button.version4 .ui-button-bg {
+  background-image: url('../../assets/FreeUi/Version4.png');
+}
+
+/* Glow effect for interactive buttons */
+.ui-button::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: radial-gradient(circle, rgba(106, 76, 158, 0.4) 0%, transparent 70%);
+  border-radius: 10px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.ui-button:hover::before {
+  opacity: 1;
+}

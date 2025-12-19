@@ -47,7 +47,7 @@ const EMOTION_EMOJIS = {
   loving: '❤️',
 };
 
-const DialogueBox = ({ onDialogueEnd }) => {
+const DialogueBox = ({ onDialogueEnd, onChoice }) => {
   // Get dialogue state from store
   const {
     isDialogueActive,
@@ -70,6 +70,19 @@ const DialogueBox = ({ onDialogueEnd }) => {
       onDialogueEnd();
     }
   }, [nextDialogue, onDialogueEnd]);
+
+  /**
+   * Handle choice selection
+   */
+  const handleChoice = useCallback((choiceId) => {
+    if (onChoice) {
+      onChoice(choiceId);
+    }
+    // After choice is made, end dialogue to trigger next phase
+    if (onDialogueEnd) {
+      setTimeout(() => onDialogueEnd(), 100);
+    }
+  }, [onChoice, onDialogueEnd]);
 
   /**
    * Handle keyboard input (Space or Enter to advance)
@@ -131,12 +144,26 @@ const DialogueBox = ({ onDialogueEnd }) => {
         {/* Bottom bar with progress and next button */}
         <div className="dialogue-footer">
           <span className="dialogue-progress">{progress}</span>
-          <button 
-            className="dialogue-next-btn"
-            onClick={handleNext}
-          >
-            {currentDialogueIndex < dialogueQueue.length - 1 ? 'Next ▶' : 'Close ✓'}
-          </button>
+          {!currentDialogue.choices ? (
+            <button 
+              className="dialogue-next-btn"
+              onClick={handleNext}
+            >
+              {currentDialogueIndex < dialogueQueue.length - 1 ? 'Next ▶' : 'Close ✓'}
+            </button>
+          ) : (
+            <div className="dialogue-choices">
+              {currentDialogue.choices.map((choice) => (
+                <button
+                  key={choice.id}
+                  className="choice-btn"
+                  onClick={() => handleChoice(choice.id)}
+                >
+                  {choice.text}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Hint for keyboard users */}

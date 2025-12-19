@@ -1,0 +1,115 @@
+/**
+ * Furniture CSS - Interactive pixel art furniture
+ * * SPRITE SHEET SPECS:
+ * - File: Interiors_free_32x32.png
+ * - Grid: 32x32 pixels
+ * - Width: 16 columns (512px width)
+ */
+
+.furniture {
+  position: absolute;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  transition: all 0.3s ease;
+}
+
+.furniture:hover {
+  filter: brightness(1.2);
+  z-index: 10; /* Bring to front on hover */
+}
+
+/* ==========================================
+   BED - Row 2 (White Single Bed)
+   Size: 32px wide x 64px tall (1x2 tiles)
+   ========================================== */
+
+.furniture-bed {
+  width: 32px;  /* Changed from 64px to match sprite */
+  height: 64px;
+  background-image: url('../../assets/room/32x32/Interiors_free_32x32.png');
+  background-size: 512px auto; /* 16 cols x 32px = 512px */
+  
+  /* Row 2, Column 0: White Bed Top */
+  /* The sprite draws the whole bed (top and bottom) if height is 64px */
+  background-position: 0px -64px; 
+  
+  z-index: 5;
+  transform: scale(1.8);
+  transform-origin: bottom left;
+}
+
+/* ==========================================
+   WARDROBE - Row 18 (Tall Wooden Cabinet)
+   Size: 32px wide x 64px tall (1x2 tiles)
+   ========================================== */
+
+.furniture-wardrobe {
+  width: 32px;
+  height: 64px;
+  background-image: url('../../assets/room/32x32/Interiors_free_32x32.png');
+  background-size: 512px auto;
+  z-index: 5;
+  transform: scale(1.8);
+  transform-origin: bottom left;
+}
+
+.furniture-wardrobe.closed {
+  /* Row 18, Column 0 */
+  background-position: 0px -576px; 
+}
+
+.furniture-wardrobe.open {
+  /* Row 18, Column 1 (Visual variant/Glass door if available) */
+  background-position: -32px -576px; 
+}
+
+/* ==========================================
+   TABLE/DESK - Row 12 (School Desk)
+   Size: 32px wide x 32px tall
+   ========================================== */
+
+.furniture-bedside-table {
+  width: 32px;
+  height: 32px;
+  background-image: url('../../assets/room/32x32/Interiors_free_32x32.png');
+  background-size: 512px auto;
+  z-index: 5;
+  transform: scale(1.8);
+  transform-origin: bottom left;
+}
+
+.furniture-bedside-table.closed {
+  /* Row 12, Column 0: Standard Desk */
+  background-position: 0px -384px; 
+}
+
+.furniture-bedside-table.open {
+  /* Row 12, Column 1: Desk with books/items */
+  background-position: -32px -384px; 
+}
+
+/* ==========================================
+   CLICK INDICATOR - Show on hover
+   ========================================== */
+
+.furniture:hover::after {
+  content: '👆';
+  position: absolute;
+  top: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1rem;
+  animation: clickHint 0.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes clickHint {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-3px); }
+}
+
+/* Don't show click indicator on beds if not interactive */
+.furniture-bed:hover::after {
+  display: none;
+}

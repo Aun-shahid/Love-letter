@@ -25,14 +25,17 @@ export const dialogues = {
     batEncounter: {
       bat: {
         blockDoor: [
-          { speaker: "Bat", text: "Hi Chichi! 🦇", emotion: "happy" },
-          { speaker: "Bat", text: "You can't leave yet.", emotion: "concerned" },
-          { speaker: "Bat", text: "It's dangerous outside alone.", emotion: "worried" },
+          { speaker: "Bat", text: "Hold on, Chichi! 🦇", emotion: "concerned" },
+          { speaker: "Bat", text: "You can't leave alone...", emotion: "worried" },
+          { speaker: "Bat", text: "Bring me three things first:", emotion: "determined" },
+          { speaker: "Bat", text: "Your tooth earrings (in wardrobe)", emotion: "determined" },
+          { speaker: "Bat", text: "Jonas the spider (on the table)", emotion: "determined" },
+          { speaker: "Bat", text: "A macaron for food (under the bed)", emotion: "determined" },
         ],
-        afterCatAppears: [
-          { speaker: "Bat", text: "Oh! You have a friend with you!", emotion: "surprised" },
-          { speaker: "Bat", text: "Well then... take care of her, little spirit! 💕", emotion: "happy" },
-          { speaker: "Bat", text: "*flies away with a smile*", emotion: "happy", isAction: true },
+        allowExit: [
+          { speaker: "Bat", text: "Ah! You have everything! 🦇", emotion: "happy" },
+          { speaker: "Bat", text: "You're ready for your journey. Go find him!", emotion: "happy" },
+          { speaker: "Bat", text: "*flutters away*", emotion: "happy", isAction: true },
         ],
       },
     },
@@ -45,12 +48,74 @@ export const dialogues = {
           { speaker: "Chichi", text: "Oh you! I didn't notice you!", emotion: "surprised" },
           { speaker: "Chichi", text: "Bonjour monsieur pussycat.", emotion: "affectionate" },
         ],
+        meetDelice: [
+          { speaker: "Chichi", text: "Delice!", emotion: "surprised" },
+          { speaker: "Chichi", text: "Bonjour Monsieur pussy cat!", emotion: "affectionate" },
+        ],
       },
       delice: {
         introduction: [
-          { speaker: "Delice", text: "*purrs softly* ✨", emotion: "calm", isAction: true },
-          { speaker: "Delice", text: "I am always with you.", emotion: "wise" },
-          { speaker: "Delice", text: "Let's go find him.", emotion: "determined" },
+          { speaker: "Delice", text: "Meow ✨", emotion: "calm", isAction: false },
+          { 
+            speaker: "Chichi", 
+            text: "Pet Delice?", 
+            emotion: "affectionate",
+            choices: [
+              { id: 'petYes', text: 'Yes 💕' },
+              { id: 'petNo', text: 'No' },
+            ]
+          },
+        ],
+      },
+      interaction: {
+        pet: [
+          { speaker: "Delice", text: "Purrr... 💕", emotion: "happy", isAction: false },
+        ],
+      },
+    },
+
+    // Furniture interactions for collectibles
+    furnitureInteraction: {
+      wardrobe: {
+        takeEarrings: [
+          { speaker: "Chichi", text: "My tooth earrings... I need these.", emotion: "nostalgic" },
+          {
+            speaker: "Chichi",
+            text: "Take them with me?",
+            emotion: "thoughtful",
+            choices: [
+              { id: 'takeYes', text: 'Take them 💍' },
+              { id: 'takeNo', text: 'Leave them' },
+            ]
+          },
+        ],
+      },
+      table: {
+        takeSpider: [
+          { speaker: "Chichi", text: "Jonas... my little friend.", emotion: "affectionate" },
+          {
+            speaker: "Chichi",
+            text: "Should I bring him along?",
+            emotion: "thoughtful",
+            choices: [
+              { id: 'takeYes', text: 'Take him 🕷️' },
+              { id: 'takeNo', text: 'Leave him' },
+            ]
+          },
+        ],
+      },
+      bed: {
+        takeMacaron: [
+          { speaker: "Chichi", text: "A macaron... under the bed?", emotion: "surprised" },
+          {
+            speaker: "Chichi",
+            text: "This could be useful for the journey.",
+            emotion: "thoughtful",
+            choices: [
+              { id: 'takeYes', text: 'Take it 🧁' },
+              { id: 'takeNo', text: 'Leave it' },
+            ]
+          },
         ],
       },
     },

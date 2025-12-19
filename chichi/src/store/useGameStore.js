@@ -47,16 +47,31 @@ const initialState = {
     giftClaimed: false,        // Player clicked "Claim Gift"
   },
   
-  // Player state
-  playerPosition: { x: 100, y: 300 },
-  playerFacing: 'right',       // 'left' or 'right'
+  // Player state - starting position in the 600x500 room
+  playerPosition: { x: 280, y: 350 },
+  playerFacing: 'down',        // 'up', 'down', 'left', or 'right' (for LPC sprites)
   isPlayerMoving: false,
   
-  // NPC visibility states
+  // NPC visibility states - positions relative to 600x500 room
   npcStates: {
-    bat: { visible: true, position: { x: 500, y: 250 } },
-    delice: { visible: false, position: { x: 80, y: 350 } },
-    nienie: { visible: false, position: { x: 700, y: 300 } },
+    bat: { visible: true, position: { x: 500, y: 330 } },
+    delice: { visible: true, position: { x: 80, y: 420 } },
+    nienie: { visible: false, position: { x: 500, y: 350 } },
+  },
+  
+  // Furniture states - track open/closed state
+  furnitureStates: {
+    wardrobe1: { isOpen: false },
+    wardrobe2: { isOpen: false },
+    cupboard: { isOpen: false },
+    bedsideTable: { isOpen: false },
+  },
+  
+  // Collectibles - items needed to unlock the door
+  collectibles: {
+    toothEarrings: false,      // From wardrobe
+    jonaSpider: false,         // From bedside table
+    macaron: false,            // From under bed
   },
   
   // Game UI state
@@ -194,15 +209,28 @@ const useGameStore = create(
       
       /**
        * Move player by delta amounts
+       * Updates facing direction based on dominant movement direction
        */
-      movePlayer: (deltaX, deltaY) => set((state) => ({
-        playerPosition: {
-          x: state.playerPosition.x + deltaX,
-          y: state.playerPosition.y + deltaY,
-        },
-        playerFacing: deltaX > 0 ? 'right' : deltaX < 0 ? 'left' : state.playerFacing,
-        isPlayerMoving: true,
-      })),
+      movePlayer: (deltaX, deltaY) => set((state) => {
+        // Determine facing direction based on movement
+        let newFacing = state.playerFacing;
+        if (Math.abs(deltaX) >= Math.abs(deltaY)) {
+          // Horizontal movement is dominant
+          newFacing = deltaX > 0 ? 'right' : deltaX < 0 ? 'left' : newFacing;
+        } else {
+          // Vertical movement is dominant
+          newFacing = deltaY > 0 ? 'down' : deltaY < 0 ? 'up' : newFacing;
+        }
+        
+        return {
+          playerPosition: {
+            x: state.playerPosition.x + deltaX,
+            y: state.playerPosition.y + deltaY,
+          },
+          playerFacing: newFacing,
+          isPlayerMoving: true,
+        };
+      }),
       
       /**
        * Stop player movement
@@ -243,6 +271,60 @@ const useGameStore = create(
           },
         },
       })),
+
+      // ============================================
+      // FURNITURE MANAGEMENT
+      // ============================================
+      
+      /**
+       * Toggle furniture open/closed state
+       */
+      toggleFurniture: (furnitureName) => set((state) => ({
+        furnitureStates: {
+          ...state.furnitureStates,
+          [furnitureName]: {
+            ...state.furnitureStates[furnitureName],
+            isOpen: !state.furnitureStates[furnitureName].isOpen,
+          },
+        },
+      })),
+      
+      /**
+       * Set furniture state explicitly
+       */
+      setFurnitureState: (furnitureName, isOpen) => set((state) => ({
+        furnitureStates: {
+          ...state.furnitureStates,
+          [furnitureName]: {
+            ...state.furnitureStates[furnitureName],
+            isOpen,
+          },
+        },
+      })),
+
+      // ============================================
+      // COLLECTIBLES MANAGEMENT
+      // ============================================
+      
+      /**
+       * Collect an item
+       */
+      collectItem: (itemName) => set((state) => ({
+        collectibles: {
+          ...state.collectibles,
+          [itemName]: true,
+        },
+      })),
+      
+      /**
+       * Check if all collectibles are collected
+       */
+      hasAllCollectibles: () => {
+        const state = get();
+        return state.collectibles.toothEarrings && 
+               state.collectibles.jonaSpider && 
+               state.collectibles.macaron;
+      },
 
       // ============================================
       // UI STATE

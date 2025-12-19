@@ -1,97 +1,106 @@
 /**
  * Player CSS Styles
  * 
- * Placeholder styling for the player character.
- * Pink color scheme representing Chichi (Fall/Spooky aesthetic).
+ * Using LPC (Liberated Pixel Cup) sprite sheets for Chichi.
+ * LPC sprites are 64x64 per frame, arranged in rows by direction.
+ * Row 0 = Up, Row 1 = Left, Row 2 = Down, Row 3 = Right
  */
 
 .player {
   position: absolute;
-  width: 60px;
-  height: 80px;
-  transition: left 0.1s ease-out, top 0.1s ease-out;
+  width: 64px;
+  height: 64px;
   z-index: 100;
+  /* Offset to center the sprite on the position */
+  margin-left: -32px;
+  margin-top: -48px;
 }
 
+/* Sprite display area */
 .player-sprite {
-  position: relative;
-  width: 100%;
-  height: 100%;
+  width: 64px;
+  height: 64px;
+  background-size: auto 256px; /* 4 rows of 64px each */
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  transform: scale(1.2);
+  transform-origin: bottom center;
 }
 
-/* Placeholder body - Pink square for Chichi */
-.player-body {
-  width: 50px;
-  height: 60px;
-  background: linear-gradient(
-    180deg,
-    #ff9ecd 0%,
-    #ff7eb9 50%,
-    #ff69b4 100%
-  );
-  border-radius: 10px 10px 5px 5px;
-  border: 3px solid #ff1493;
-  box-shadow: 
-    0 0 15px rgba(255, 105, 180, 0.5),
-    inset 0 -10px 20px rgba(0, 0, 0, 0.2);
-  position: relative;
+/* ==========================================
+   DIRECTION ROWS (LPC Standard)
+   Row 0 = Up (facing away)
+   Row 1 = Left
+   Row 2 = Down (facing camera)
+   Row 3 = Right
+   ========================================== */
+
+.player.facing-up .player-sprite {
+  background-position-y: 0px;
 }
 
-/* Cute face placeholder */
-.player-body::before {
-  content: '◕‿◕';
-  position: absolute;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 14px;
-  color: #333;
+.player.facing-left .player-sprite {
+  background-position-y: -64px;
 }
 
-/* Hair/decoration */
-.player-body::after {
-  content: '🎀';
-  position: absolute;
-  top: -15px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 20px;
+.player.facing-down .player-sprite {
+  background-position-y: -128px;
 }
 
-/* Character label */
+.player.facing-right .player-sprite {
+  background-position-y: -192px;
+}
+
+/* ==========================================
+   IDLE ANIMATION
+   Single frame, subtle breathing effect
+   ========================================== */
+
+.player.idle .player-sprite {
+  background-position-x: 0px;
+  animation: idleBreath 2s ease-in-out infinite;
+}
+
+@keyframes idleBreath {
+  0%, 100% {
+    transform: scale(1.2) translateY(0);
+  }
+  50% {
+    transform: scale(1.2) translateY(-2px);
+  }
+}
+
+/* ==========================================
+   WALKING ANIMATION
+   9 frames at 64px each = 576px total width
+   ========================================== */
+
+.player.walking .player-sprite {
+  animation: walkCycle 0.8s steps(9) infinite;
+}
+
+@keyframes walkCycle {
+  from {
+    background-position-x: 0px;
+  }
+  to {
+    background-position-x: -576px; /* 9 frames * 64px */
+  }
+}
+
+/* ==========================================
+   CHARACTER LABEL
+   ========================================== */
+
 .player-label {
   text-align: center;
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   color: #ff69b4;
-  text-shadow: 0 0 5px rgba(255, 105, 180, 0.8);
-  margin-top: 5px;
+  text-shadow: 
+    0 0 5px rgba(255, 105, 180, 0.8),
+    1px 1px 2px rgba(0, 0, 0, 0.8);
+  margin-top: 2px;
   font-weight: bold;
-}
-
-/* Walking animation */
-.player.moving .player-body {
-  animation: playerBob 0.3s ease-in-out infinite;
-}
-
-@keyframes playerBob {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-3px);
-  }
-}
-
-/* Idle breathing animation */
-.player:not(.moving) .player-body {
-  animation: playerBreath 2s ease-in-out infinite;
-}
-
-@keyframes playerBreath {
-  0%, 100% {
-    transform: scaleY(1);
-  }
-  50% {
-    transform: scaleY(1.02);
-  }
+  white-space: nowrap;
 }

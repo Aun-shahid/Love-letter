@@ -1,0 +1,84 @@
+/**
+ * Cat CSS Styles
+ * 
+ * Delice sprite sheet - Custom animation frames
+ * Arranged in grid layout
+ */
+
+.cat {
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  z-index: 50;
+  /* Offset to center the sprite on the position */
+  margin-left: -32px;
+  margin-top: -48px;
+}
+
+/* Sprite display area */
+.cat-sprite {
+  width: 64px;
+  height: 64px;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  transform: scale(1.0);
+  transform-origin: bottom center;
+  /* CatPackFree Idle.png - auto sizing to show proper frame */
+  background-size: auto 64px;
+  background-position: 0 0;
+}
+
+/* ==========================================
+   IDLE ANIMATION
+   ========================================== */
+
+.cat.idle .cat-sprite {
+  animation: catIdleBreath 2s ease-in-out infinite;
+}
+
+@keyframes catIdleBreath {
+  0%, 100% {
+    transform: scale(1.0) translateY(0);
+  }
+  50% {
+    transform: scale(1.0) translateY(-2px);
+  }
+}
+
+/* ==========================================
+   CHARACTER LABEL & LOVE EMOJI
+   ========================================== */
+
+.cat-label {
+  text-align: center;
+  font-size: 0.65rem;
+  color: #7fffd4;
+  text-shadow: 
+    0 0 5px rgba(127, 255, 212, 0.6),
+    1px 1px 2px rgba(0, 0, 0, 0.8);
+  margin-top: 2px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.cat-love-emoji {
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.5rem;
+  animation: catLoveFloat 1.5s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes catLoveFloat {
+  0% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(0.5);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-40px) scale(1.2);
+  }
+}

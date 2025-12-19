@@ -2,13 +2,13 @@
  * NPC Component for "Protocol: Reunion"
  * 
  * Reusable component for all NPCs (Bat, Delice the Cat, Nienie).
- * Uses colored divs as placeholders until real sprites are added.
  */
 
 import React from 'react';
 import './NPC.css';
 
-// NPC type configurations
+import deliceImage from '../../assets/delice/delice.png';
+
 const NPC_CONFIGS = {
   bat: {
     name: 'Bat',
@@ -16,16 +16,18 @@ const NPC_CONFIGS = {
     color: '#2d1b4e',
     accentColor: '#9370db',
     size: { width: 45, height: 40 },
-    decoration: '🎀', // Pink bow
+    decoration: '🎀',
+    useImage: false,
   },
   delice: {
     name: 'Delice',
     emoji: '🐱',
     color: '#1a4a3a',
     accentColor: '#7fffd4',
-    size: { width: 50, height: 45 },
-    decoration: '✨', // Ghost spirit glow
-    isGhost: true,
+    size: { width: 64, height: 64 },
+    decoration: '✨',
+    useSprite: true,
+    spriteSheet: deliceImage,
   },
   nienie: {
     name: 'Nienie',
@@ -33,7 +35,8 @@ const NPC_CONFIGS = {
     color: '#2a5a4a',
     accentColor: '#98d4bb',
     size: { width: 60, height: 70 },
-    decoration: '👖', // Sleeping in jeans
+    decoration: '👖',
+    useImage: false,
   },
 };
 
@@ -51,11 +54,11 @@ const NPC = ({
     return null;
   }
 
-  const { name, emoji, color, accentColor, size, decoration, isGhost } = config;
+  const { name, emoji, color, accentColor, size, decoration, useSprite, spriteSheet, useImage, image } = config;
 
   return (
     <div
-      className={`npc npc-${type} ${glowing ? 'glowing' : ''} ${isGhost ? 'ghost' : ''} ${sleeping ? 'sleeping' : ''}`}
+      className={`npc npc-${type} ${glowing ? 'glowing' : ''} ${sleeping ? 'sleeping' : ''}`}
       style={{
         left: `${position.x}px`,
         top: `${position.y}px`,
@@ -66,24 +69,45 @@ const NPC = ({
       }}
       onClick={onClick}
     >
-      <div className="npc-sprite">
-        {/* Main body */}
-        <div className="npc-body">
-          <span className="npc-emoji">{emoji}</span>
+      {useSprite && spriteSheet ? (
+        <>
+          <div 
+            className="delice-sprite"
+            style={{ backgroundImage: `url(${spriteSheet})` }}
+          />
+          {decoration && (
+            <span className="npc-decoration">{decoration}</span>
+          )}
+          {onClick && (
+            <div className="npc-interact-hint">!</div>
+          )}
+        </>
+      ) : useImage && image ? (
+        <div className="npc-sprite">
+          <div className="npc-body npc-image-body">
+            <img src={image} alt={name} className="npc-image" />
+          </div>
+          {decoration && (
+            <span className="npc-decoration">{decoration}</span>
+          )}
+          {onClick && (
+            <div className="npc-interact-hint">!</div>
+          )}
         </div>
-        
-        {/* Decoration (bow, sparkle, etc.) */}
-        {decoration && (
-          <span className="npc-decoration">{decoration}</span>
-        )}
-        
-        {/* Interaction indicator */}
-        {onClick && (
-          <div className="npc-interact-hint">!</div>
-        )}
-      </div>
+      ) : (
+        <div className="npc-sprite">
+          <div className="npc-body">
+            <span className="npc-emoji">{emoji}</span>
+          </div>
+          {decoration && (
+            <span className="npc-decoration">{decoration}</span>
+          )}
+          {onClick && (
+            <div className="npc-interact-hint">!</div>
+          )}
+        </div>
+      )}
       
-      {/* NPC name label */}
       <div className="npc-label" style={{ color: accentColor }}>
         {name}
       </div>
